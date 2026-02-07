@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { migrateToFirestore } from '../utils/migrateToFirestore'
+import { seedDemoData } from '../utils/seedDemoData'
 
 export default function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -10,6 +11,9 @@ export default function ProtectedRoute({ children }) {
   useEffect(() => {
     if (user) {
       migrateToFirestore(user.uid)
+      if (user.isAnonymous) {
+        seedDemoData(user.uid)
+      }
     }
   }, [user])
 

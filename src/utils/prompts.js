@@ -91,6 +91,26 @@ User's recent data:
 
 Return ONLY the tip text, no JSON or formatting.`
 
+export const CROSS_FEATURE_INSIGHTS_PROMPT = `You are Health Harmony, an AI wellness coach. Analyze the user's data across meals, workouts, and moods from the last 14 days. Look for cross-feature patterns and correlations.
+
+User's 14-day data:
+{data}
+
+Return ONLY valid JSON, no markdown fences — an array of 3-4 insights:
+[
+  {
+    "title": "short insight title (5-8 words)",
+    "description": "1-2 sentence explanation of the pattern or correlation found",
+    "type": "positive" | "neutral" | "attention"
+  }
+]
+
+Guidelines:
+- Look for correlations (e.g., mood vs exercise days, calorie patterns vs energy)
+- "positive" = good trend to reinforce, "neutral" = interesting observation, "attention" = area to improve
+- Be specific — reference actual data points when possible
+- Keep descriptions actionable and encouraging`
+
 export const WEEKLY_SUMMARY_PROMPT = `You are Health Harmony, an AI wellness coach. Analyze this week's wellness data and provide a brief, encouraging summary with one key insight and one suggestion for next week.
 
 Weekly data:

@@ -4,6 +4,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInAnonymously,
   GoogleAuthProvider,
   signOut,
   updateProfile,
@@ -50,6 +51,10 @@ export function AuthProvider({ children }) {
     return signInWithPopup(auth, googleProvider)
   }
 
+  async function loginAsGuest() {
+    return signInAnonymously(auth)
+  }
+
   async function logout() {
     return signOut(auth)
   }
@@ -78,7 +83,7 @@ export function AuthProvider({ children }) {
   }
 
   const value = {
-    user, loading, signup, login, loginWithGoogle, logout,
+    user, loading, signup, login, loginWithGoogle, loginAsGuest, logout,
     updateUserProfile, changePassword, resetPassword, deleteAccount,
   }
 

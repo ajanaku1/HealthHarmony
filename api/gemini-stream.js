@@ -42,9 +42,16 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error('Gemini stream error:', err)
     const msg = err.message || ''
-    const friendly = (msg.includes('429') || msg.includes('quota') || msg.includes('Too Many Requests'))
-      ? 'AI is a bit busy right now. Please wait a moment and try again.'
-      : 'Something went wrong. Please try again.'
+    let friendly
+    if (msg.includes('429') || msg.includes('quota') || msg.includes('Too Many Requests')) {
+      friendly = 'AI is a bit busy right now. Please wait a moment and try again.'
+    } else if (msg.includes('API_KEY') || msg.includes('apiKey')) {
+      friendly = 'API key configuration issue. Please check GEMINI_API_KEY.'
+    } else if (msg.includes('not found') || msg.includes('404')) {
+      friendly = 'AI model not available. Please check the model name.'
+    } else {
+      friendly = msg || 'Something went wrong. Please try again.'
+    }
     if (!res.headersSent) {
       res.status(msg.includes('429') ? 429 : 500).json({ error: friendly })
     } else {

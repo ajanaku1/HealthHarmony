@@ -1,3 +1,5 @@
+import GeminiBadge from './GeminiBadge'
+
 export default function NutritionCard({ data }) {
   if (!data) return null
 
@@ -14,7 +16,10 @@ export default function NutritionCard({ data }) {
     <div className="card space-y-5">
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="font-bold text-lg">{data.meal_name}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-bold text-lg">{data.meal_name}</h3>
+            <GeminiBadge />
+          </div>
           <p className="text-sm text-gray-500 mt-1">{data.ingredients?.join(', ')}</p>
         </div>
         <div className="flex items-center gap-2">

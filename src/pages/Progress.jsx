@@ -3,6 +3,7 @@ import { MoodChart, CalorieChart, WorkoutChart } from '../components/WellnessCha
 import useFirestore from '../hooks/useFirestore'
 import useGemini from '../hooks/useGemini'
 import { WEEKLY_SUMMARY_PROMPT } from '../utils/prompts'
+import GeminiBadge from '../components/GeminiBadge'
 
 export default function Progress() {
   const { data: meals, loading: mealsLoading } = useFirestore('meals')
@@ -90,6 +91,7 @@ export default function Progress() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
             </svg>
             AI Weekly Insight
+            <GeminiBadge size="sm" />
           </h3>
           {summaryLoading ? (
             <div className="flex items-center gap-2">

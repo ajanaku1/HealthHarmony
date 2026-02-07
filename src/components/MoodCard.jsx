@@ -1,4 +1,5 @@
 import { MOOD_CATEGORIES } from '../utils/constants'
+import GeminiBadge from './GeminiBadge'
 
 export default function MoodCard({ data }) {
   if (!data) return null
@@ -13,7 +14,10 @@ export default function MoodCard({ data }) {
         <div className="flex items-center gap-3">
           <span className="text-4xl">{moodInfo.emoji}</span>
           <div>
-            <h3 className="font-bold text-lg">{moodInfo.label}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold text-lg">{moodInfo.label}</h3>
+              <GeminiBadge />
+            </div>
             <div className="flex items-center gap-2 mt-1">
               <span className={`text-xs font-medium px-3 py-1 rounded-full ${energyColors[data.energy_level] || energyColors.medium}`}>
                 {data.energy_level} energy

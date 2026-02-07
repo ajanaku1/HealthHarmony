@@ -7,6 +7,8 @@ import { DAILY_TIP_PROMPT } from '../utils/prompts'
 import { useAuth } from '../contexts/AuthContext'
 import { useUserProfile } from '../contexts/UserProfileContext'
 import StreakCalendar from '../components/StreakCalendar'
+import AIInsights from '../components/AIInsights'
+import GeminiBadge from '../components/GeminiBadge'
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -94,7 +96,10 @@ export default function Dashboard() {
             </svg>
           </div>
           <div>
-            <h3 className="font-semibold text-sm text-white/80 mb-1">Daily AI Wellness Tip</h3>
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-semibold text-sm text-white/80">Daily AI Wellness Tip</h3>
+              <GeminiBadge size="xs" />
+            </div>
             {tipLoading ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
@@ -137,6 +142,9 @@ export default function Dashboard() {
 
       {/* Streak Calendar */}
       <StreakCalendar meals={meals} workouts={workouts} moods={moods} />
+
+      {/* AI Insights */}
+      <AIInsights meals={meals} workouts={workouts} moods={moods} />
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 gap-3">

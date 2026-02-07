@@ -1,58 +1,215 @@
+import { useState, useEffect, useRef } from 'react'
+import useGeminiStream from '../hooks/useGeminiStream'
+import useFirestore from '../hooks/useFirestore'
+import useFirestoreDoc from '../hooks/useFirestoreDoc'
+import { useAuth } from '../contexts/AuthContext'
+import { useUserProfile } from '../contexts/UserProfileContext'
+import { getChatSystemPrompt } from '../utils/prompts'
+import GeminiBadge from '../components/GeminiBadge'
+
+const SUGGESTIONS = [
+  'How is my nutrition this week?',
+  'Give me a workout suggestion',
+  'How can I improve my mood?',
+  'What should I eat today?',
+]
+
 export default function ChatCoach() {
+  const { user } = useAuth()
+  const { profile } = useUserProfile()
+  const { data: meals } = useFirestore('meals')
+  const { data: workouts } = useFirestore('workouts')
+  const { data: moods } = useFirestore('moods')
+  const { data: chatData, setData: saveChatData } = useFirestoreDoc('chat/history')
+  const { streamChat, streaming, error } = useGeminiStream()
+
+  const [messages, setMessages] = useState([])
+  const [streamingText, setStreamingText] = useState('')
+  const [input, setInput] = useState('')
+  const messagesEndRef = useRef(null)
+  const inputRef = useRef(null)
+  const initializedRef = useRef(false)
+
+  // Load saved messages
+  useEffect(() => {
+    if (chatData?.messages && !initializedRef.current) {
+      setMessages(chatData.messages)
+      initializedRef.current = true
+    }
+  }, [chatData])
+
+  // Auto-scroll
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, streamingText])
+
+  function buildContext() {
+    const recentMeals = meals.slice(0, 5).map((m) => `- ${m.meal_name}: ${m.nutrition?.calories} kcal, health score ${m.health_score}/10`)
+    const recentWorkouts = workouts.slice(0, 3).map((w) => `- ${w.exercise_detected}: form ${w.form_score}/10, ${w.reps_counted || '?'} reps`)
+    const recentMoods = moods.slice(0, 3).map((m) => `- ${m.mood_category} (${m.mood_score}/10), energy: ${m.energy_level}`)
+
+    return [
+      recentMeals.length ? `Recent meals:\n${recentMeals.join('\n')}` : 'No recent meals logged.',
+      recentWorkouts.length ? `Recent workouts:\n${recentWorkouts.join('\n')}` : 'No recent workouts logged.',
+      recentMoods.length ? `Recent moods:\n${recentMoods.join('\n')}` : 'No recent moods logged.',
+    ].join('\n\n')
+  }
+
+  async function handleSend(text) {
+    const message = (text || input).trim()
+    if (!message || streaming) return
+
+    const userMsg = { role: 'user', content: message }
+    const updatedMessages = [...messages, userMsg]
+    setMessages(updatedMessages)
+    setInput('')
+    setStreamingText('')
+
+    try {
+      const context = buildContext()
+      const systemPrompt = getChatSystemPrompt(context, profile)
+      const history = updatedMessages.map((m) => ({
+        role: m.role === 'user' ? 'user' : 'model',
+        text: m.content,
+      }))
+
+      const fullText = await streamChat(history, systemPrompt, (chunk) => {
+        setStreamingText(chunk)
+      })
+
+      const assistantMsg = { role: 'assistant', content: fullText }
+      const finalMessages = [...updatedMessages, assistantMsg].slice(-50)
+      setMessages(finalMessages)
+      setStreamingText('')
+      saveChatData({ messages: finalMessages })
+    } catch {
+      // Error is handled by the hook
+    }
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSend()
+    }
+  }
+
+  const firstName = (user?.displayName || 'there').split(' ')[0]
+
   return (
-    <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)]">
-      <div className="text-center max-w-md mx-auto px-4">
-        {/* Icon */}
-        <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg">
-          <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.456-2.456L14.25 6l1.035-.259a3.375 3.375 0 002.456-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
-          </svg>
-        </div>
-
-        {/* Title */}
-        <h1 className="text-2xl font-bold mb-2">Personal Coach</h1>
-        <div className="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-full mb-4">
-          COMING SOON
-        </div>
-
-        {/* Description */}
-        <p className="text-gray-500 text-sm leading-relaxed mb-8">
-          Your AI-powered personal wellness coach is on the way. Get custom workout plans,
-          personalized meal prep guidance, and 1-on-1 coaching tailored to your goals.
-        </p>
-
-        {/* Feature preview cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
-          <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
-            <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center mb-2">
-              <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-              </svg>
-            </div>
-            <p className="text-xs font-semibold text-gray-700">1-on-1 Chat</p>
-            <p className="text-xs text-gray-400 mt-0.5">Real-time wellness advice</p>
+    <div className="flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)] -m-4 md:-m-8">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-3 flex items-center justify-between flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
+            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+            </svg>
           </div>
-          <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
-            <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center mb-2">
-              <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-              </svg>
-            </div>
-            <p className="text-xs font-semibold text-gray-700">Custom Plans</p>
-            <p className="text-xs text-gray-400 mt-0.5">Workout & meal schedules</p>
-          </div>
-          <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
-            <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center mb-2">
-              <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-              </svg>
-            </div>
-            <p className="text-xs font-semibold text-gray-700">Progress Tracking</p>
-            <p className="text-xs text-gray-400 mt-0.5">Guided goal milestones</p>
+          <div>
+            <h1 className="text-white font-semibold text-sm">AI Wellness Coach</h1>
+            <p className="text-white/70 text-xs">Powered by Gemini 3</p>
           </div>
         </div>
+        <GeminiBadge size="sm" />
+      </div>
 
-        <p className="text-xs text-gray-400 mt-8">We&apos;ll notify you when this feature is ready.</p>
+      {/* Messages area */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-gray-50">
+        {messages.length === 0 && !streaming && (
+          <div className="flex flex-col items-center justify-center h-full text-center">
+            <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4">
+              <svg className="w-8 h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+              </svg>
+            </div>
+            <h2 className="text-lg font-semibold text-gray-800 mb-1">
+              Hi {firstName}! I&apos;m your wellness coach.
+            </h2>
+            <p className="text-sm text-gray-500 mb-6 max-w-sm">
+              Ask me anything about nutrition, workouts, mood, or your overall wellness journey.
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {SUGGESTIONS.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => handleSend(s)}
+                  className="text-xs bg-white border border-gray-200 rounded-full px-4 py-2 text-gray-600 hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-700 transition-all"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {messages.map((msg, i) => (
+          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div
+              className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                msg.role === 'user'
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-br-md'
+                  : 'bg-white border border-gray-100 text-gray-700 rounded-bl-md shadow-sm'
+              }`}
+            >
+              <p className="whitespace-pre-wrap">{msg.content}</p>
+            </div>
+          </div>
+        ))}
+
+        {streaming && streamingText && (
+          <div className="flex justify-start">
+            <div className="max-w-[80%] rounded-2xl rounded-bl-md px-4 py-3 bg-white border border-gray-100 shadow-sm">
+              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap streaming-cursor">
+                {streamingText}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {streaming && !streamingText && (
+          <div className="flex justify-start">
+            <div className="rounded-2xl rounded-bl-md px-4 py-3 bg-white border border-gray-100 shadow-sm">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="flex justify-center">
+            <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+          </div>
+        )}
+
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input bar */}
+      <div className="flex-shrink-0 bg-white border-t border-gray-200 px-4 py-3">
+        <div className="flex items-end gap-2 max-w-4xl mx-auto">
+          <textarea
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask your wellness coach..."
+            rows={1}
+            className="flex-1 resize-none rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent placeholder-gray-400"
+          />
+          <button
+            onClick={() => handleSend()}
+            disabled={!input.trim() || streaming}
+            className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl flex items-center justify-center hover:from-emerald-600 hover:to-teal-600 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   )

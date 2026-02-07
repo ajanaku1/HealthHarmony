@@ -1,10 +1,20 @@
-import { Link, Navigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
 export default function Landing() {
-  const { user } = useAuth()
+  const { user, loginAsGuest } = useAuth()
+  const navigate = useNavigate()
 
   if (user) return <Navigate to="/dashboard" replace />
+
+  async function handleTryDemo() {
+    try {
+      await loginAsGuest()
+      navigate('/dashboard')
+    } catch (err) {
+      console.error('Demo login failed:', err)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -16,6 +26,9 @@ export default function Landing() {
             <span className="font-bold text-lg gradient-text">Health Harmony</span>
           </div>
           <div className="flex items-center gap-3">
+            <button onClick={handleTryDemo} className="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
+              Try Demo
+            </button>
             <Link to="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
               Sign In
             </Link>
@@ -35,10 +48,13 @@ export default function Landing() {
           <p className="mt-6 text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
             Track meals, workouts, and mood with intelligent AI analysis. Get personalized insights to build healthier habits — all in one beautiful app.
           </p>
-          <div className="mt-10">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <Link to="/signup" className="btn-primary text-base px-8 py-3.5 inline-block">
-              Get Started — It's Free
+              Get Started — It&apos;s Free
             </Link>
+            <button onClick={handleTryDemo} className="btn-secondary text-base px-8 py-3.5">
+              Try Demo
+            </button>
           </div>
           <div className="mt-12 flex flex-wrap justify-center gap-3">
             {[

@@ -21,8 +21,17 @@ export default function useGeminiStream() {
       })
 
       if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Streaming request failed')
+        let message = 'Streaming request failed'
+        try {
+          const text = await res.text()
+          try {
+            const json = JSON.parse(text)
+            message = json.error || message
+          } catch {
+            if (text) message = text
+          }
+        } catch {}
+        throw new Error(message)
       }
 
       const reader = res.body.getReader()
