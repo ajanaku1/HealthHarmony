@@ -1,17 +1,24 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import useStorage from '../hooks/useStorage'
+import useFirestore from '../hooks/useFirestore'
 import useGemini from '../hooks/useGemini'
-import { STORAGE_KEYS, MOOD_CATEGORIES } from '../utils/constants'
+import { MOOD_CATEGORIES } from '../utils/constants'
 import { DAILY_TIP_PROMPT } from '../utils/prompts'
+import { useAuth } from '../contexts/AuthContext'
+import { useUserProfile } from '../contexts/UserProfileContext'
+import StreakCalendar from '../components/StreakCalendar'
 
 export default function Dashboard() {
-  const { data: meals } = useStorage(STORAGE_KEYS.MEALS)
-  const { data: workouts } = useStorage(STORAGE_KEYS.WORKOUTS)
-  const { data: moods } = useStorage(STORAGE_KEYS.MOODS)
+  const { user } = useAuth()
+  const { profile } = useUserProfile()
+  const { data: meals, loading: mealsLoading } = useFirestore('meals')
+  const { data: workouts, loading: workoutsLoading } = useFirestore('workouts')
+  const { data: moods, loading: moodsLoading } = useFirestore('moods')
   const [tip, setTip] = useState('')
   const [tipLoading, setTipLoading] = useState(false)
   const { analyze } = useGemini()
+
+  const firstName = (user?.displayName || 'there').split(' ')[0]
 
   const latestMeal = meals[0]
   const latestWorkout = workouts[0]
@@ -25,8 +32,13 @@ export default function Dashboard() {
     moods.find((m) => new Date(m.timestamp).toDateString() === today),
   ].filter(Boolean).length
 
+  const dataLoading = mealsLoading || workoutsLoading || moodsLoading
+
   useEffect(() => {
-    const cached = localStorage.getItem(STORAGE_KEYS.DAILY_TIP)
+    if (dataLoading || !user) return
+
+    const tipKey = `hh_daily_tip_${user.uid}`
+    const cached = localStorage.getItem(tipKey)
     if (cached) {
       try {
         const parsed = JSON.parse(cached)
@@ -40,12 +52,13 @@ export default function Dashboard() {
     async function fetchTip() {
       setTipLoading(true)
       try {
-        const context = `Meals logged: ${meals.length}, Workouts: ${workouts.length}, Moods: ${moods.length}. Latest mood: ${latestMood?.mood_category || 'none'}. Latest meal calories: ${latestMeal?.nutrition?.calories || 'none'}.`
+        const profileContext = profile ? `User goals: ${(profile.fitnessGoals || []).join(', ')}. Fitness level: ${profile.fitnessLevel || 'unknown'}. Diet: ${(profile.dietaryPreferences || []).join(', ') || 'none'}.` : ''
+        const context = `Meals logged: ${meals.length}, Workouts: ${workouts.length}, Moods: ${moods.length}. Latest mood: ${latestMood?.mood_category || 'none'}. Latest meal calories: ${latestMeal?.nutrition?.calories || 'none'}. ${profileContext}`
         const prompt = DAILY_TIP_PROMPT.replace('{context}', context)
         const result = await analyze(prompt)
         const tipText = typeof result === 'string' ? result : result.tip || 'Stay hydrated and take breaks!'
         setTip(tipText)
-        localStorage.setItem(STORAGE_KEYS.DAILY_TIP, JSON.stringify({ date: today, tip: tipText }))
+        localStorage.setItem(tipKey, JSON.stringify({ date: today, tip: tipText }))
       } catch {
         setTip('Stay hydrated, move your body, and take moments to breathe today!')
       } finally {
@@ -53,7 +66,7 @@ export default function Dashboard() {
       }
     }
     fetchTip()
-  }, [])
+  }, [dataLoading, user])
 
   const quickActions = [
     { path: '/meals', label: 'Log Meal', icon: '🍽️', color: 'from-orange-400 to-amber-400' },
@@ -67,7 +80,7 @@ export default function Dashboard() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold">
-          Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}!
+          Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}, {firstName}!
         </h1>
         <p className="text-gray-500 mt-1">Here&apos;s your wellness snapshot</p>
       </div>
@@ -121,6 +134,9 @@ export default function Dashboard() {
           ))}
         </div>
       </div>
+
+      {/* Streak Calendar */}
+      <StreakCalendar meals={meals} workouts={workouts} moods={moods} />
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 gap-3">

@@ -2,28 +2,27 @@ import { useState } from 'react'
 import FileUpload from '../components/FileUpload'
 import WorkoutFeedback from '../components/WorkoutFeedback'
 import useGemini from '../hooks/useGemini'
-import useStorage from '../hooks/useStorage'
-import { STORAGE_KEYS } from '../utils/constants'
+import useFirestore from '../hooks/useFirestore'
 import { WORKOUT_ANALYSIS_PROMPT } from '../utils/prompts'
-import { fileToBase64, fileToGenerativePart } from '../utils/fileToBase64'
+import { fileToBase64, fileToGenerativePart, extractVideoFrames } from '../utils/fileToBase64'
 
 export default function WorkoutCoach() {
   const [file, setFile] = useState(null)
   const [result, setResult] = useState(null)
   const { analyze, loading, error } = useGemini()
-  const { data: workouts, addItem } = useStorage(STORAGE_KEYS.WORKOUTS)
+  const { data: workouts, addItem } = useFirestore('workouts')
 
   async function handleAnalyze() {
     if (!file) return
     try {
-      const base64 = await fileToBase64(file)
-      const videoPart = fileToGenerativePart(base64, file.type)
+      const frames = await extractVideoFrames(file, 4)
+      const frameParts = frames.map((b64) => fileToGenerativePart(b64, 'image/jpeg'))
 
       const prevContext = workouts.length > 0
         ? `\n\nPrevious session: ${workouts[0].exercise_detected}, form score: ${workouts[0].form_score}/10. Compare and note improvement.`
         : ''
 
-      const data = await analyze(WORKOUT_ANALYSIS_PROMPT + prevContext, [videoPart])
+      const data = await analyze(WORKOUT_ANALYSIS_PROMPT + '\n\nThese are frames extracted from the workout video at different timestamps. Analyze the exercise form across these frames.' + prevContext, frameParts)
       setResult(data)
       if (data && typeof data === 'object') {
         addItem(data)

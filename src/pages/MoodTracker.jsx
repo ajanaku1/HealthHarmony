@@ -2,8 +2,8 @@ import { useState } from 'react'
 import AudioRecorder from '../components/AudioRecorder'
 import MoodCard from '../components/MoodCard'
 import useGemini from '../hooks/useGemini'
-import useStorage from '../hooks/useStorage'
-import { STORAGE_KEYS, MOOD_CATEGORIES } from '../utils/constants'
+import useFirestore from '../hooks/useFirestore'
+import { MOOD_CATEGORIES } from '../utils/constants'
 import { MOOD_ANALYSIS_PROMPT, MOOD_TEXT_PROMPT } from '../utils/prompts'
 import { fileToBase64, fileToGenerativePart } from '../utils/fileToBase64'
 
@@ -13,7 +13,7 @@ export default function MoodTracker() {
   const [journalText, setJournalText] = useState('')
   const [result, setResult] = useState(null)
   const { analyze, loading, error } = useGemini()
-  const { data: moods, addItem } = useStorage(STORAGE_KEYS.MOODS)
+  const { data: moods, addItem } = useFirestore('moods')
 
   async function handleAnalyze() {
     try {

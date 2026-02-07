@@ -1,5 +1,6 @@
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink, useLocation, Link } from 'react-router-dom'
 import { NAV_ITEMS } from '../utils/constants'
+import { useAuth } from '../contexts/AuthContext'
 
 const icons = {
   home: (
@@ -36,9 +37,29 @@ const icons = {
 
 export default function Layout({ children }) {
   const location = useLocation()
+  const { user, logout } = useAuth()
+
+  const displayName = user?.displayName || user?.email?.split('@')[0] || 'User'
+  const initials = displayName.charAt(0).toUpperCase()
 
   return (
     <div className="min-h-screen flex flex-col pb-20 md:pb-0 md:flex-row">
+      {/* Mobile top bar */}
+      <div className="md:hidden flex items-center justify-between bg-white border-b border-gray-200 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <img src="/HHlogo.png" alt="Health Harmony" className="w-8 h-8 rounded-lg" />
+          <span className="font-semibold text-sm gradient-text">Health Harmony</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link to="/profile" className="text-xs text-gray-500 truncate max-w-[120px] hover:text-emerald-600 transition-colors">{displayName}</Link>
+          <button onClick={logout} className="text-gray-400 hover:text-gray-600 transition-colors">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
       {/* Desktop sidebar */}
       <aside className="hidden md:flex md:flex-col md:w-64 bg-white border-r border-gray-200 min-h-screen p-4">
         <div className="flex items-center gap-3 px-3 py-4 mb-6">
@@ -67,7 +88,30 @@ export default function Layout({ children }) {
           ))}
         </nav>
         <div className="mt-auto pt-4 border-t border-gray-100">
-          <p className="text-xs text-gray-400 px-3">Powered by Gemini</p>
+          <div className="flex items-center gap-3 px-3 py-2">
+            <Link to="/profile" className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity">
+              {user?.photoURL ? (
+                <img src={user.photoURL} alt="" className="w-8 h-8 rounded-full" referrerPolicy="no-referrer" />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-semibold">
+                  {initials}
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-700 truncate">{displayName}</p>
+                <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+              </div>
+            </Link>
+            <button
+              onClick={logout}
+              title="Sign out"
+              className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+              </svg>
+            </button>
+          </div>
         </div>
       </aside>
 

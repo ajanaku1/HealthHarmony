@@ -41,10 +41,14 @@ export default async function handler(req, res) {
     res.end()
   } catch (err) {
     console.error('Gemini stream error:', err)
+    const msg = err.message || ''
+    const friendly = (msg.includes('429') || msg.includes('quota') || msg.includes('Too Many Requests'))
+      ? 'AI is a bit busy right now. Please wait a moment and try again.'
+      : 'Something went wrong. Please try again.'
     if (!res.headersSent) {
-      res.status(500).json({ error: err.message || 'Streaming failed' })
+      res.status(msg.includes('429') ? 429 : 500).json({ error: friendly })
     } else {
-      res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`)
+      res.write(`data: ${JSON.stringify({ error: friendly })}\n\n`)
       res.end()
     }
   }

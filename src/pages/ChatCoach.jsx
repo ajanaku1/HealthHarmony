@@ -1,38 +1,55 @@
 import { useState, useRef, useEffect } from 'react'
 import ChatMessage from '../components/ChatMessage'
 import useGeminiStream from '../hooks/useGeminiStream'
-import { STORAGE_KEYS } from '../utils/constants'
+import useFirestore from '../hooks/useFirestore'
+import useFirestoreDoc from '../hooks/useFirestoreDoc'
 import { getChatSystemPrompt } from '../utils/prompts'
+import { useUserProfile } from '../contexts/UserProfileContext'
 
 export default function ChatCoach() {
-  const [messages, setMessages] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.CHAT_HISTORY)
-      return saved ? JSON.parse(saved) : []
-    } catch { return [] }
-  })
+  const { data: chatData, setData: setChatData } = useFirestoreDoc('chat/history')
+  const { data: meals } = useFirestore('meals')
+  const { data: workouts } = useFirestore('workouts')
+  const { data: moods } = useFirestore('moods')
+  const { profile } = useUserProfile()
+  const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [streamingText, setStreamingText] = useState('')
   const { streamChat, streaming, error } = useGeminiStream()
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
+  const chatLoaded = useRef(false)
+
+  // Load messages from Firestore on first data arrival
+  useEffect(() => {
+    if (chatData?.messages && !chatLoaded.current) {
+      setMessages(chatData.messages)
+      chatLoaded.current = true
+    }
+  }, [chatData])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, streamingText])
 
+  // Save messages to Firestore when they change
   useEffect(() => {
-    if (messages.length > 0) {
-      localStorage.setItem(STORAGE_KEYS.CHAT_HISTORY, JSON.stringify(messages.slice(-50)))
+    if (messages.length > 0 && chatLoaded.current) {
+      setChatData({ messages: messages.slice(-50) })
     }
   }, [messages])
 
   function buildContext() {
-    const meals = JSON.parse(localStorage.getItem(STORAGE_KEYS.MEALS) || '[]')
-    const workouts = JSON.parse(localStorage.getItem(STORAGE_KEYS.WORKOUTS) || '[]')
-    const moods = JSON.parse(localStorage.getItem(STORAGE_KEYS.MOODS) || '[]')
-
     const parts = []
+
+    if (profile) {
+      const goals = (profile.fitnessGoals || []).join(', ')
+      if (goals) parts.push(`User goals: ${goals}`)
+      if (profile.fitnessLevel) parts.push(`Fitness level: ${profile.fitnessLevel}`)
+      const diet = (profile.dietaryPreferences || []).join(', ')
+      if (diet) parts.push(`Dietary preferences: ${diet}`)
+    }
+
     if (meals.length > 0) {
       const recent = meals.slice(0, 3)
       parts.push(`Recent meals: ${recent.map((m) => `${m.meal_name} (${m.nutrition?.calories} kcal, health score ${m.health_score}/10)`).join('; ')}`)
@@ -66,7 +83,7 @@ export default function ChatCoach() {
     setStreamingText('')
 
     try {
-      const systemPrompt = getChatSystemPrompt(buildContext())
+      const systemPrompt = getChatSystemPrompt(buildContext(), profile)
       const fullText = await streamChat(newMessages, systemPrompt, (text) => {
         setStreamingText(text)
       })
@@ -80,7 +97,7 @@ export default function ChatCoach() {
 
   function clearChat() {
     setMessages([])
-    localStorage.removeItem(STORAGE_KEYS.CHAT_HISTORY)
+    setChatData({ messages: [] })
   }
 
   const showWelcome = messages.length === 0 && !streaming
@@ -98,6 +115,19 @@ export default function ChatCoach() {
             Clear chat
           </button>
         )}
+      </div>
+
+      {/* Personal Coach coming soon banner */}
+      <div className="mb-4 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-xl px-4 py-3 flex items-center gap-3">
+        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.456-2.456L14.25 6l1.035-.259a3.375 3.375 0 002.456-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+          </svg>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-indigo-800">Personal Coach — Coming Soon</p>
+          <p className="text-xs text-indigo-600/70">Custom workout plans, meal prep, and 1-on-1 guided programs tailored to your goals.</p>
+        </div>
       </div>
 
       {/* Messages */}

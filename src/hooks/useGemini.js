@@ -15,8 +15,19 @@ export default function useGemini() {
       })
 
       if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'API request failed')
+        let message = 'API request failed'
+        try {
+          const err = await res.json()
+          message = err.error || message
+        } catch {
+          const text = await res.text().catch(() => '')
+          if (res.status === 413 || text.includes('Request Entity Too Large')) {
+            message = 'File is too large. Please use a shorter video or a smaller file.'
+          } else {
+            message = text || `Request failed (${res.status})`
+          }
+        }
+        throw new Error(message)
       }
 
       const { text } = await res.json()

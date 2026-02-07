@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react'
 import { MoodChart, CalorieChart, WorkoutChart } from '../components/WellnessChart'
-import useStorage from '../hooks/useStorage'
+import useFirestore from '../hooks/useFirestore'
 import useGemini from '../hooks/useGemini'
-import { STORAGE_KEYS, MOOD_CATEGORIES } from '../utils/constants'
 import { WEEKLY_SUMMARY_PROMPT } from '../utils/prompts'
 
 export default function Progress() {
-  const { data: meals } = useStorage(STORAGE_KEYS.MEALS)
-  const { data: workouts } = useStorage(STORAGE_KEYS.WORKOUTS)
-  const { data: moods } = useStorage(STORAGE_KEYS.MOODS)
+  const { data: meals, loading: mealsLoading } = useFirestore('meals')
+  const { data: workouts, loading: workoutsLoading } = useFirestore('workouts')
+  const { data: moods, loading: moodsLoading } = useFirestore('moods')
   const [summary, setSummary] = useState(null)
   const [summaryLoading, setSummaryLoading] = useState(false)
   const { analyze } = useGemini()

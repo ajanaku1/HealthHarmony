@@ -25,6 +25,10 @@ export default async function handler(req, res) {
     res.status(200).json({ text })
   } catch (err) {
     console.error('Gemini API error:', err)
-    res.status(500).json({ error: err.message || 'Gemini API call failed' })
+    const msg = err.message || ''
+    if (msg.includes('429') || msg.includes('quota') || msg.includes('Too Many Requests')) {
+      return res.status(429).json({ error: 'AI is a bit busy right now. Please wait a moment and try again.' })
+    }
+    res.status(500).json({ error: 'Something went wrong. Please try again.' })
   }
 }

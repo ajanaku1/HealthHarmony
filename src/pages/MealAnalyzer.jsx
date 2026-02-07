@@ -2,8 +2,7 @@ import { useState } from 'react'
 import FileUpload from '../components/FileUpload'
 import NutritionCard from '../components/NutritionCard'
 import useGemini from '../hooks/useGemini'
-import useStorage from '../hooks/useStorage'
-import { STORAGE_KEYS } from '../utils/constants'
+import useFirestore from '../hooks/useFirestore'
 import { MEAL_ANALYSIS_PROMPT } from '../utils/prompts'
 import { fileToBase64, fileToGenerativePart } from '../utils/fileToBase64'
 
@@ -11,7 +10,7 @@ export default function MealAnalyzer() {
   const [file, setFile] = useState(null)
   const [result, setResult] = useState(null)
   const { analyze, loading, error } = useGemini()
-  const { data: meals, addItem } = useStorage(STORAGE_KEYS.MEALS)
+  const { data: meals, addItem } = useFirestore('meals')
 
   async function handleAnalyze() {
     if (!file) return
