@@ -63,7 +63,7 @@ export default function Onboarding() {
         onboardingComplete: true,
         completedAt: new Date().toISOString(),
       })
-      navigate('/', { replace: true })
+      navigate('/dashboard', { replace: true })
     } catch (error) {
       console.error('Failed to save onboarding:', error)
     } finally {

@@ -15,7 +15,7 @@ export const MOOD_CATEGORIES = {
 }
 
 export const NAV_ITEMS = [
-  { path: '/', label: 'Home', icon: 'home' },
+  { path: '/dashboard', label: 'Home', icon: 'home' },
   { path: '/meals', label: 'Meals', icon: 'meal' },
   { path: '/workout', label: 'Workout', icon: 'workout' },
   { path: '/mood', label: 'Mood', icon: 'mood' },

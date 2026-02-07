@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
+import Landing from './pages/Landing'
 import Dashboard from './pages/Dashboard'
 import MealAnalyzer from './pages/MealAnalyzer'
 import WorkoutCoach from './pages/WorkoutCoach'
@@ -15,6 +16,7 @@ import Onboarding from './pages/Onboarding'
 export default function App() {
   return (
     <Routes>
+      <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route
@@ -31,7 +33,7 @@ export default function App() {
           <ProtectedRoute>
             <Layout>
               <Routes>
-                <Route path="/" element={<Dashboard />} />
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/meals" element={<MealAnalyzer />} />
                 <Route path="/workout" element={<WorkoutCoach />} />
                 <Route path="/mood" element={<MoodTracker />} />

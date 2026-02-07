@@ -15,7 +15,7 @@ export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const from = location.state?.from || '/'
+  const from = location.state?.from || '/dashboard'
 
   async function handleSubmit(e) {
     e.preventDefault()
