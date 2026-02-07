@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { geminiModel } from '../config/gemini'
 
 export default function useGemini() {
   const [loading, setLoading] = useState(false)
@@ -9,9 +8,18 @@ export default function useGemini() {
     setLoading(true)
     setError(null)
     try {
-      const parts = [...fileParts, { text: prompt }]
-      const result = await geminiModel.generateContent(parts)
-      const text = result.response.text()
+      const res = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, fileParts }),
+      })
+
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'API request failed')
+      }
+
+      const { text } = await res.json()
       // Try to parse as JSON, fall back to raw text
       try {
         const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
