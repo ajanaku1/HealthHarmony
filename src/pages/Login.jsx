@@ -47,7 +47,7 @@ export default function Login() {
       navigate(isNewUser ? '/onboarding' : from, { replace: true })
     } catch (err) {
       if (err.code !== 'auth/popup-closed-by-user') {
-        setError('Google sign-in failed. Please try again.')
+        setError(`Google sign-in failed: ${err.code || err.message}`)
       }
     }
   }

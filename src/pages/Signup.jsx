@@ -50,7 +50,7 @@ export default function Signup() {
       navigate('/onboarding', { replace: true })
     } catch (err) {
       if (err.code !== 'auth/popup-closed-by-user') {
-        setError('Google sign-in failed. Please try again.')
+        setError(`Google sign-in failed: ${err.code || err.message}`)
       }
     }
   }
