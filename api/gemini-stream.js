@@ -19,7 +19,7 @@ export default async function handler(req, res) {
         role: msg.role === 'user' ? 'user' : 'model',
         parts: [{ text: msg.text }],
       })),
-      systemInstruction: systemPrompt,
+      systemInstruction: { parts: [{ text: systemPrompt }] },
     })
 
     const lastUserMsg = history?.[history.length - 1]?.text || ''
