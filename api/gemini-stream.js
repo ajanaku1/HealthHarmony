@@ -8,19 +8,23 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { history, systemPrompt, model } = req.body
+    const { history, systemPrompt, model, tools, toolContext, generationConfig } = req.body
 
-    const geminiModel = genAI.getGenerativeModel({
-      model: model || 'gemini-3-flash-preview',
-    })
+    const modelConfig = { model: model || 'gemini-3-flash-preview' }
+    if (tools) modelConfig.tools = tools
 
-    const chat = geminiModel.startChat({
+    const geminiModel = genAI.getGenerativeModel(modelConfig)
+
+    const chatConfig = {
       history: (history || []).slice(0, -1).map((msg) => ({
         role: msg.role === 'user' ? 'user' : 'model',
         parts: [{ text: msg.text }],
       })),
       systemInstruction: { parts: [{ text: systemPrompt }] },
-    })
+    }
+    if (generationConfig) chatConfig.generationConfig = generationConfig
+
+    const chat = geminiModel.startChat(chatConfig)
 
     const lastUserMsg = history?.[history.length - 1]?.text || ''
 
@@ -28,12 +32,55 @@ export default async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-cache')
     res.setHeader('Connection', 'keep-alive')
 
-    const result = await chat.sendMessageStream(lastUserMsg)
+    let result = await chat.sendMessageStream(lastUserMsg)
 
-    for await (const chunk of result.stream) {
-      const text = chunk.text()
-      if (text) {
-        res.write(`data: ${JSON.stringify({ text })}\n\n`)
+    // Function calling resolution loop
+    const MAX_TOOL_ROUNDS = 3
+    for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
+      let fullResponse = ''
+      let functionCalls = []
+
+      for await (const chunk of result.stream) {
+        const parts = chunk.candidates?.[0]?.content?.parts || []
+        for (const part of parts) {
+          if (part.text) {
+            fullResponse += part.text
+            res.write(`data: ${JSON.stringify({ text: part.text })}\n\n`)
+          }
+          if (part.functionCall) {
+            functionCalls.push(part.functionCall)
+          }
+        }
+      }
+
+      // Check for grounding metadata
+      const response = await result.response
+      const groundingMetadata = response.candidates?.[0]?.groundingMetadata
+      if (groundingMetadata) {
+        res.write(`data: ${JSON.stringify({ groundingMetadata })}\n\n`)
+      }
+
+      // If no function calls, we're done
+      if (functionCalls.length === 0) break
+
+      // Resolve function calls
+      if (toolContext) {
+        for (const fc of functionCalls) {
+          res.write(`data: ${JSON.stringify({ toolCall: { name: fc.name, args: fc.args } })}\n\n`)
+
+          const resolver = toolContext[fc.name]
+          const fnResult = resolver ? resolver(fc.args || {}) : { error: `Unknown function: ${fc.name}` }
+
+          // Send function response back to the model
+          result = await chat.sendMessageStream([{
+            functionResponse: {
+              name: fc.name,
+              response: fnResult,
+            },
+          }])
+        }
+      } else {
+        break
       }
     }
 

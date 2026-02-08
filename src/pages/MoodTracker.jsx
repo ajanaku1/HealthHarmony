@@ -5,6 +5,8 @@ import useGemini from '../hooks/useGemini'
 import useFirestore from '../hooks/useFirestore'
 import { MOOD_CATEGORIES } from '../utils/constants'
 import { MOOD_ANALYSIS_PROMPT, MOOD_TEXT_PROMPT } from '../utils/prompts'
+import { MOOD_SCHEMA } from '../utils/schemas'
+import { FLASH } from '../utils/geminiModels'
 import { fileToBase64, fileToGenerativePart } from '../utils/fileToBase64'
 
 export default function MoodTracker() {
@@ -15,16 +17,24 @@ export default function MoodTracker() {
   const { analyze, loading, error } = useGemini()
   const { data: moods, addItem } = useFirestore('moods')
 
+  const geminiOptions = {
+    model: FLASH,
+    generationConfig: {
+      responseMimeType: 'application/json',
+      responseSchema: MOOD_SCHEMA,
+    },
+  }
+
   async function handleAnalyze() {
     try {
       let data
       if (mode === 'voice' && audioBlob) {
         const base64 = await fileToBase64(audioBlob)
         const audioPart = fileToGenerativePart(base64, 'audio/webm')
-        data = await analyze(MOOD_ANALYSIS_PROMPT, [audioPart])
+        data = await analyze(MOOD_ANALYSIS_PROMPT, [audioPart], geminiOptions)
       } else if (mode === 'text' && journalText.trim()) {
         const prompt = MOOD_TEXT_PROMPT.replace('{text}', journalText)
-        data = await analyze(prompt)
+        data = await analyze(prompt, [], geminiOptions)
       } else {
         return
       }

@@ -8,21 +8,30 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { prompt, fileParts, model } = req.body
+    const { prompt, fileParts, model, generationConfig, tools } = req.body
 
     if (!prompt) {
       return res.status(400).json({ error: 'Prompt is required' })
     }
 
-    const geminiModel = genAI.getGenerativeModel({
-      model: model || 'gemini-3-flash-preview',
-    })
+    const modelConfig = { model: model || 'gemini-3-flash-preview' }
+    if (tools) modelConfig.tools = tools
+
+    const geminiModel = genAI.getGenerativeModel(modelConfig)
 
     const parts = [...(fileParts || []), { text: prompt }]
-    const result = await geminiModel.generateContent(parts)
-    const text = result.response.text()
+    const requestOptions = {}
+    if (generationConfig) requestOptions.generationConfig = generationConfig
 
-    res.status(200).json({ text })
+    const result = await geminiModel.generateContent({ contents: [{ parts }], ...requestOptions })
+    const response = result.response
+    const text = response.text()
+    const groundingMetadata = response.candidates?.[0]?.groundingMetadata || null
+
+    const body = { text }
+    if (groundingMetadata) body.groundingMetadata = groundingMetadata
+
+    res.status(200).json(body)
   } catch (err) {
     console.error('Gemini API error:', err)
     const msg = err.message || ''

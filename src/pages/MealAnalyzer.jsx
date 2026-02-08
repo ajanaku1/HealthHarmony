@@ -4,6 +4,8 @@ import NutritionCard from '../components/NutritionCard'
 import useGemini from '../hooks/useGemini'
 import useFirestore from '../hooks/useFirestore'
 import { MEAL_ANALYSIS_PROMPT } from '../utils/prompts'
+import { MEAL_SCHEMA } from '../utils/schemas'
+import { FLASH } from '../utils/geminiModels'
 import { fileToBase64, fileToGenerativePart } from '../utils/fileToBase64'
 
 export default function MealAnalyzer() {
@@ -17,7 +19,13 @@ export default function MealAnalyzer() {
     try {
       const base64 = await fileToBase64(file)
       const imagePart = fileToGenerativePart(base64, file.type)
-      const data = await analyze(MEAL_ANALYSIS_PROMPT, [imagePart])
+      const data = await analyze(MEAL_ANALYSIS_PROMPT, [imagePart], {
+        model: FLASH,
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseSchema: MEAL_SCHEMA,
+        },
+      })
       setResult(data)
       if (data && typeof data === 'object') {
         addItem(data)

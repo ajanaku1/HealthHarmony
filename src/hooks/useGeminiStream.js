@@ -3,20 +3,30 @@ import { useState, useRef, useCallback } from 'react'
 export default function useGeminiStream() {
   const [streaming, setStreaming] = useState(false)
   const [error, setError] = useState(null)
+  const [groundingSources, setGroundingSources] = useState(null)
+  const [activeToolCall, setActiveToolCall] = useState(null)
   const abortRef = useRef(null)
 
-  const streamChat = useCallback(async (history, systemPrompt, onChunk) => {
+  const streamChat = useCallback(async (history, systemPrompt, onChunk, options = {}) => {
     setStreaming(true)
     setError(null)
+    setGroundingSources(null)
+    setActiveToolCall(null)
 
     const controller = new AbortController()
     abortRef.current = controller
 
     try {
+      const body = { history, systemPrompt }
+      if (options.model) body.model = options.model
+      if (options.tools) body.tools = options.tools
+      if (options.toolContext) body.toolContext = options.toolContext
+      if (options.generationConfig) body.generationConfig = options.generationConfig
+
       const res = await fetch('/api/gemini-stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ history, systemPrompt }),
+        body: JSON.stringify(body),
         signal: controller.signal,
       })
 
@@ -54,13 +64,24 @@ export default function useGeminiStream() {
             try {
               const parsed = JSON.parse(data)
               if (parsed.error) throw new Error(parsed.error)
-              fullText += parsed.text
-              onChunk(fullText)
-            } catch {}
+              if (parsed.text) {
+                fullText += parsed.text
+                onChunk(fullText)
+              }
+              if (parsed.groundingMetadata) {
+                setGroundingSources(parsed.groundingMetadata)
+              }
+              if (parsed.toolCall) {
+                setActiveToolCall(parsed.toolCall)
+              }
+            } catch (e) {
+              if (e.message && !e.message.includes('JSON')) throw e
+            }
           }
         }
       }
 
+      setActiveToolCall(null)
       return fullText
     } catch (err) {
       if (err.name !== 'AbortError') {
@@ -78,5 +99,5 @@ export default function useGeminiStream() {
     abortRef.current?.abort()
   }, [])
 
-  return { streamChat, streaming, error, abort }
+  return { streamChat, streaming, error, abort, groundingSources, activeToolCall }
 }

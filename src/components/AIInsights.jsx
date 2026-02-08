@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import useGemini from '../hooks/useGemini'
 import { CROSS_FEATURE_INSIGHTS_PROMPT } from '../utils/prompts'
+import { INSIGHTS_SCHEMA } from '../utils/schemas'
+import { PRO } from '../utils/geminiModels'
 import { useAuth } from '../contexts/AuthContext'
 import GeminiBadge from './GeminiBadge'
 
@@ -47,7 +49,13 @@ export default function AIInsights({ meals, workouts, moods }) {
         })
 
         const prompt = CROSS_FEATURE_INSIGHTS_PROMPT.replace('{data}', data)
-        const result = await analyze(prompt)
+        const result = await analyze(prompt, [], {
+          model: PRO,
+          generationConfig: {
+            responseMimeType: 'application/json',
+            responseSchema: INSIGHTS_SCHEMA,
+          },
+        })
         const arr = Array.isArray(result) ? result : []
         setInsights(arr)
         localStorage.setItem(cacheKey, JSON.stringify({ date: today, insights: arr }))
@@ -70,6 +78,7 @@ export default function AIInsights({ meals, workouts, moods }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
         </svg>
         <h2 className="font-semibold text-gray-700">AI Insights</h2>
+        <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Pro</span>
         <GeminiBadge size="sm" />
       </div>
 

@@ -4,6 +4,7 @@ import useFirestore from '../hooks/useFirestore'
 import useGemini from '../hooks/useGemini'
 import { MOOD_CATEGORIES } from '../utils/constants'
 import { DAILY_TIP_PROMPT } from '../utils/prompts'
+import { FLASH } from '../utils/geminiModels'
 import { useAuth } from '../contexts/AuthContext'
 import { useUserProfile } from '../contexts/UserProfileContext'
 import StreakCalendar from '../components/StreakCalendar'
@@ -57,7 +58,7 @@ export default function Dashboard() {
         const profileContext = profile ? `User goals: ${(profile.fitnessGoals || []).join(', ')}. Fitness level: ${profile.fitnessLevel || 'unknown'}. Diet: ${(profile.dietaryPreferences || []).join(', ') || 'none'}.` : ''
         const context = `Meals logged: ${meals.length}, Workouts: ${workouts.length}, Moods: ${moods.length}. Latest mood: ${latestMood?.mood_category || 'none'}. Latest meal calories: ${latestMeal?.nutrition?.calories || 'none'}. ${profileContext}`
         const prompt = DAILY_TIP_PROMPT.replace('{context}', context)
-        const result = await analyze(prompt)
+        const result = await analyze(prompt, [], { model: FLASH })
         const tipText = typeof result === 'string' ? result : result.tip || 'Stay hydrated and take breaks!'
         setTip(tipText)
         localStorage.setItem(tipKey, JSON.stringify({ date: today, tip: tipText }))

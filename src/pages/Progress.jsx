@@ -3,6 +3,8 @@ import { MoodChart, CalorieChart, WorkoutChart } from '../components/WellnessCha
 import useFirestore from '../hooks/useFirestore'
 import useGemini from '../hooks/useGemini'
 import { WEEKLY_SUMMARY_PROMPT } from '../utils/prompts'
+import { WEEKLY_SUMMARY_SCHEMA } from '../utils/schemas'
+import { PRO } from '../utils/geminiModels'
 import GeminiBadge from '../components/GeminiBadge'
 
 export default function Progress() {
@@ -41,7 +43,13 @@ export default function Progress() {
       })
 
       const prompt = WEEKLY_SUMMARY_PROMPT.replace('{data}', data)
-      const result = await analyze(prompt)
+      const result = await analyze(prompt, [], {
+        model: PRO,
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseSchema: WEEKLY_SUMMARY_SCHEMA,
+        },
+      })
       setSummary(result)
     } catch {
       setSummary({ summary: 'Keep up the great work! Consistency is key.', highlight: 'Logging your wellness data', insight: 'Track regularly for better insights.', suggestion: 'Try to log at least one entry in each category daily.' })
@@ -91,6 +99,7 @@ export default function Progress() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
             </svg>
             AI Weekly Insight
+            <span className="text-xs text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">Pro</span>
             <GeminiBadge size="sm" />
           </h3>
           {summaryLoading ? (

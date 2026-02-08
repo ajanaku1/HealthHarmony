@@ -5,6 +5,8 @@ import useFirestoreDoc from '../hooks/useFirestoreDoc'
 import { useAuth } from '../contexts/AuthContext'
 import { useUserProfile } from '../contexts/UserProfileContext'
 import { getChatSystemPrompt } from '../utils/prompts'
+import { CHAT_TOOL_DECLARATIONS, buildToolContext } from '../utils/chatTools'
+import { PRO } from '../utils/geminiModels'
 import GeminiBadge from '../components/GeminiBadge'
 
 const SUGGESTIONS = [
@@ -21,7 +23,7 @@ export default function ChatCoach() {
   const { data: workouts } = useFirestore('workouts')
   const { data: moods } = useFirestore('moods')
   const { data: chatData, setData: saveChatData } = useFirestoreDoc('chat/history')
-  const { streamChat, streaming, error } = useGeminiStream()
+  const { streamChat, streaming, error, groundingSources, activeToolCall } = useGeminiStream()
 
   const [messages, setMessages] = useState([])
   const [streamingText, setStreamingText] = useState('')
@@ -43,18 +45,6 @@ export default function ChatCoach() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, streamingText])
 
-  function buildContext() {
-    const recentMeals = meals.slice(0, 5).map((m) => `- ${m.meal_name}: ${m.nutrition?.calories} kcal, health score ${m.health_score}/10`)
-    const recentWorkouts = workouts.slice(0, 3).map((w) => `- ${w.exercise_detected}: form ${w.form_score}/10, ${w.reps_counted || '?'} reps`)
-    const recentMoods = moods.slice(0, 3).map((m) => `- ${m.mood_category} (${m.mood_score}/10), energy: ${m.energy_level}`)
-
-    return [
-      recentMeals.length ? `Recent meals:\n${recentMeals.join('\n')}` : 'No recent meals logged.',
-      recentWorkouts.length ? `Recent workouts:\n${recentWorkouts.join('\n')}` : 'No recent workouts logged.',
-      recentMoods.length ? `Recent moods:\n${recentMoods.join('\n')}` : 'No recent moods logged.',
-    ].join('\n\n')
-  }
-
   async function handleSend(text) {
     const message = (text || input).trim()
     if (!message || streaming) return
@@ -66,15 +56,20 @@ export default function ChatCoach() {
     setStreamingText('')
 
     try {
-      const context = buildContext()
-      const systemPrompt = getChatSystemPrompt(context, profile)
+      const systemPrompt = getChatSystemPrompt(profile)
       const history = updatedMessages.map((m) => ({
         role: m.role === 'user' ? 'user' : 'model',
         text: m.content,
       }))
 
+      const toolContext = buildToolContext(meals, workouts, moods)
+
       const fullText = await streamChat(history, systemPrompt, (chunk) => {
         setStreamingText(chunk)
+      }, {
+        model: PRO,
+        tools: CHAT_TOOL_DECLARATIONS,
+        toolContext,
       })
 
       const assistantMsg = { role: 'assistant', content: fullText }
@@ -108,7 +103,7 @@ export default function ChatCoach() {
           </div>
           <div>
             <h1 className="text-white font-semibold text-sm">AI Wellness Coach</h1>
-            <p className="text-white/70 text-xs">Powered by Gemini 3</p>
+            <p className="text-white/70 text-xs">Gemini 3 Pro + Grounding + Tools</p>
           </div>
         </div>
         <GeminiBadge size="sm" />
@@ -127,7 +122,7 @@ export default function ChatCoach() {
               Hi {firstName}! I&apos;m your wellness coach.
             </h2>
             <p className="text-sm text-gray-500 mb-6 max-w-sm">
-              Ask me anything about nutrition, workouts, mood, or your overall wellness journey.
+              Ask me anything about nutrition, workouts, mood, or your overall wellness journey. I can look up your data in real-time.
             </p>
             <div className="flex flex-wrap justify-center gap-2">
               {SUGGESTIONS.map((s) => (
@@ -157,6 +152,18 @@ export default function ChatCoach() {
           </div>
         ))}
 
+        {/* Tool call indicator */}
+        {activeToolCall && (
+          <div className="flex justify-start">
+            <div className="rounded-2xl rounded-bl-md px-4 py-2 bg-blue-50 border border-blue-100">
+              <div className="flex items-center gap-2 text-xs text-blue-600">
+                <div className="w-3 h-3 border-2 border-blue-400 border-t-blue-600 rounded-full animate-spin" />
+                Looking up {activeToolCall.name.replace(/_/g, ' ').replace('get ', '')}...
+              </div>
+            </div>
+          </div>
+        )}
+
         {streaming && streamingText && (
           <div className="flex justify-start">
             <div className="max-w-[80%] rounded-2xl rounded-bl-md px-4 py-3 bg-white border border-gray-100 shadow-sm">
@@ -167,13 +174,35 @@ export default function ChatCoach() {
           </div>
         )}
 
-        {streaming && !streamingText && (
+        {streaming && !streamingText && !activeToolCall && (
           <div className="flex justify-start">
             <div className="rounded-2xl rounded-bl-md px-4 py-3 bg-white border border-gray-100 shadow-sm">
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                 <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                 <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Grounding sources */}
+        {groundingSources && groundingSources.groundingChunks && (
+          <div className="flex justify-start">
+            <div className="max-w-[80%] rounded-xl px-3 py-2 bg-gray-50 border border-gray-200">
+              <p className="text-xs text-gray-400 mb-1 font-medium">Sources</p>
+              <div className="flex flex-wrap gap-1.5">
+                {groundingSources.groundingChunks.slice(0, 3).map((chunk, i) => (
+                  <a
+                    key={i}
+                    href={chunk.web?.uri}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-600 hover:text-blue-800 bg-blue-50 rounded px-2 py-1 truncate max-w-[200px]"
+                  >
+                    {chunk.web?.title || chunk.web?.uri}
+                  </a>
+                ))}
               </div>
             </div>
           </div>

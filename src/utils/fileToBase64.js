@@ -62,3 +62,12 @@ export function extractVideoFrames(file, count = 4) {
     }
   })
 }
+
+export function captureVideoFrame(videoElement, quality = 0.7) {
+  const canvas = document.createElement('canvas')
+  canvas.width = Math.min(videoElement.videoWidth || 640, 640)
+  canvas.height = Math.round((canvas.width / (videoElement.videoWidth || 640)) * (videoElement.videoHeight || 480))
+  const ctx = canvas.getContext('2d')
+  ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height)
+  return canvas.toDataURL('image/jpeg', quality).split(',')[1]
+}

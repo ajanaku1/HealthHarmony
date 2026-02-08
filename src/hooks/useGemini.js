@@ -4,14 +4,19 @@ export default function useGemini() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  async function analyze(prompt, fileParts = []) {
+  async function analyze(prompt, fileParts = [], options = {}) {
     setLoading(true)
     setError(null)
     try {
+      const body = { prompt, fileParts }
+      if (options.model) body.model = options.model
+      if (options.tools) body.tools = options.tools
+      if (options.generationConfig) body.generationConfig = options.generationConfig
+
       const res = await fetch('/api/gemini', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, fileParts }),
+        body: JSON.stringify(body),
       })
 
       if (!res.ok) {
@@ -30,14 +35,32 @@ export default function useGemini() {
         throw new Error(message)
       }
 
-      const { text } = await res.json()
-      // Try to parse as JSON, fall back to raw text
-      try {
-        const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-        return JSON.parse(cleaned)
-      } catch {
-        return text
+      const json = await res.json()
+      const { text, groundingMetadata } = json
+
+      // If structured output was requested, the response is already JSON
+      const isStructured = options.generationConfig?.responseMimeType === 'application/json'
+
+      let parsed
+      if (isStructured) {
+        try {
+          parsed = JSON.parse(text)
+        } catch {
+          parsed = text
+        }
+      } else {
+        try {
+          const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+          parsed = JSON.parse(cleaned)
+        } catch {
+          parsed = text
+        }
       }
+
+      if (groundingMetadata) {
+        return { data: parsed, groundingMetadata }
+      }
+      return parsed
     } catch (err) {
       const message = err.message || 'Failed to analyze. Please try again.'
       setError(message)
