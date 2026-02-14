@@ -92,7 +92,7 @@ export default function AIInsights({ meals, workouts, moods }) {
           {insights.map((insight, i) => {
             const config = typeConfig[insight.type] || typeConfig.neutral
             return (
-              <div key={i} className={`rounded-xl p-4 border ${config.bg} ${config.border}`}>
+              <div key={i} className={`rounded-lg p-4 border ${config.bg} ${config.border}`}>
                 <div className="flex items-start gap-3">
                   <div className={`w-8 h-8 rounded-lg ${config.iconBg} flex items-center justify-center flex-shrink-0 text-sm`}>
                     {config.icon}

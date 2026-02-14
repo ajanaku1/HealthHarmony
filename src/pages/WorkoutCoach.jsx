@@ -61,10 +61,10 @@ export default function WorkoutCoach() {
       </div>
 
       {/* Mode Toggle */}
-      <div className="flex gap-2 bg-gray-100 rounded-xl p-1">
+      <div className="flex gap-2 bg-gray-100 rounded-lg p-1">
         <button
           onClick={() => { setMode('upload'); setResult(null) }}
-          className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${
+          className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors active:scale-[0.97] ${
             mode === 'upload' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'
           }`}
         >
@@ -72,7 +72,7 @@ export default function WorkoutCoach() {
         </button>
         <button
           onClick={() => { setMode('live'); setResult(null); setFile(null) }}
-          className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${
+          className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors active:scale-[0.97] ${
             mode === 'live' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'
           }`}
         >
@@ -112,7 +112,7 @@ export default function WorkoutCoach() {
       )}
 
       {error && (
-        <div className="bg-red-50 text-red-600 rounded-xl p-4 text-sm">
+        <div className="bg-red-50 text-red-600 rounded-lg p-4 text-sm">
           {error}
         </div>
       )}
@@ -135,14 +135,14 @@ export default function WorkoutCoach() {
           <h2 className="font-semibold text-gray-700 mb-3">Recent Workouts</h2>
           <div className="space-y-2">
             {workouts.slice(0, 5).map((w) => (
-              <div key={w.id} className="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-100">
+              <div key={w.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
                 <div>
                   <p className="text-sm font-medium">{w.exercise_detected}</p>
                   <p className="text-xs text-gray-400">{new Date(w.timestamp).toLocaleDateString()}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-bold text-emerald-600">{w.form_score}/10</p>
-                  <p className="text-xs text-gray-400">{w.reps_counted ? `${w.reps_counted} reps` : ''}</p>
+                  <p className="text-sm font-bold text-emerald-600 tabular-nums">{w.form_score}/10</p>
+                  <p className="text-xs text-gray-400 tabular-nums">{w.reps_counted ? `${w.reps_counted} reps` : ''}</p>
                 </div>
               </div>
             ))}

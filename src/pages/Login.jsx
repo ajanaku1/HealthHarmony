@@ -56,14 +56,14 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <img src="/HHlogo.png" alt="Health Harmony" className="w-16 h-16 rounded-2xl mx-auto mb-4 shadow-md" />
+          <img src="/HHlogo.png" alt="Health Harmony" className="w-16 h-16 rounded-xl mx-auto mb-4 shadow-md" />
           <h1 className="text-2xl font-bold gradient-text">Health Harmony</h1>
           <p className="text-gray-500 text-sm mt-1">Welcome back! Sign in to continue.</p>
         </div>
 
         <div className="card">
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
               {error}
             </div>
           )}
@@ -76,7 +76,7 @@ export default function Login() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:border-transparent transition-colors"
                 placeholder="you@example.com"
               />
             </div>
@@ -87,12 +87,12 @@ export default function Login() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:border-transparent transition-colors"
                 placeholder="Enter your password"
               />
             </div>
             <div className="flex justify-end">
-              <button type="button" onClick={() => { setShowReset(true); setResetEmail(email) }} className="text-xs text-emerald-600 hover:text-emerald-700 font-medium">
+              <button type="button" onClick={() => { setShowReset(true); setResetEmail(email) }} className="text-xs text-emerald-600 hover:text-emerald-700 font-medium min-h-[44px]">
                 Forgot password?
               </button>
             </div>
@@ -102,14 +102,14 @@ export default function Login() {
           </form>
 
           {showReset && (
-            <div className="mt-4 p-4 bg-gray-50 rounded-xl space-y-3">
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg space-y-3">
               <h3 className="text-sm font-semibold text-gray-700">Reset Password</h3>
               <input
                 type="email"
                 value={resetEmail}
                 onChange={(e) => setResetEmail(e.target.value)}
                 placeholder="Enter your email"
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:border-transparent"
               />
               {resetMsg && (
                 <p className={`text-sm ${resetMsg.includes('sent') ? 'text-emerald-600' : 'text-red-500'}`}>{resetMsg}</p>

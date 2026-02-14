@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
 const CAPABILITIES = [
@@ -49,28 +48,9 @@ const PIPELINE_STEPS = [
 ]
 
 export default function Landing() {
-  const { user, loginAsGuest } = useAuth()
-  const [demoLoading, setDemoLoading] = useState(false)
-  const [demoError, setDemoError] = useState(null)
+  const { user } = useAuth()
 
   if (user) return <Navigate to="/dashboard" replace />
-
-  async function handleTryDemo() {
-    setDemoLoading(true)
-    setDemoError(null)
-    try {
-      await loginAsGuest()
-      // Auth state change will trigger re-render → Navigate redirect above
-    } catch (err) {
-      console.error('Demo login failed:', err)
-      if (err.code === 'auth/operation-not-allowed') {
-        setDemoError('Anonymous sign-in is not enabled. Please enable it in Firebase Console → Authentication → Sign-in method.')
-      } else {
-        setDemoError(err.message || 'Demo login failed. Please try again.')
-      }
-      setDemoLoading(false)
-    }
-  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -82,15 +62,15 @@ export default function Landing() {
             <span className="font-bold text-lg gradient-text">Health Harmony</span>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={handleTryDemo} disabled={demoLoading} className="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors disabled:opacity-50">
-              {demoLoading ? 'Loading...' : 'Try Demo'}
-            </button>
-            <Link to="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+            <a href="/demo" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors min-h-[44px] flex items-center px-2">
+              Try Demo
+            </a>
+            <a href="/login" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors min-h-[44px] flex items-center px-2">
               Sign In
-            </Link>
-            <Link to="/signup" className="btn-primary text-sm px-4 py-2">
+            </a>
+            <a href="/signup" target="_blank" rel="noopener noreferrer" className="btn-primary text-sm px-4 py-2">
               Get Started
-            </Link>
+            </a>
           </div>
         </div>
       </nav>
@@ -99,7 +79,7 @@ export default function Landing() {
       <section className="bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 py-20 sm:py-28 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto text-center">
           {/* Gemini Badge */}
-          <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-emerald-200 rounded-full px-4 py-2 mb-6 shadow-sm">
+          <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-emerald-200 rounded-full px-4 py-2.5 mb-6 shadow-sm">
             <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
             </svg>
@@ -113,16 +93,13 @@ export default function Landing() {
             Powered by Google Gemini 3 with structured output, streaming chat, function calling, and real-time vision. Track meals, workouts, and mood with intelligent AI analysis.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <Link to="/signup" className="btn-primary text-base px-8 py-3.5 inline-block">
+            <a href="/signup" target="_blank" rel="noopener noreferrer" className="btn-primary text-base px-8 py-3.5 inline-block">
               Get Started &mdash; It&apos;s Free
-            </Link>
-            <button onClick={handleTryDemo} disabled={demoLoading} className="btn-secondary text-base px-8 py-3.5 disabled:opacity-50">
-              {demoLoading ? 'Starting Demo...' : 'Try Demo'}
-            </button>
+            </a>
+            <a href="/demo" target="_blank" rel="noopener noreferrer" className="btn-secondary text-base px-8 py-3.5 inline-block">
+              Try Demo
+            </a>
           </div>
-          {demoError && (
-            <p className="mt-4 text-red-600 text-sm max-w-md mx-auto">{demoError}</p>
-          )}
           <div className="mt-12 flex flex-wrap justify-center gap-3">
             {[
               { icon: '📸', label: 'Meal Vision' },
@@ -156,8 +133,8 @@ export default function Landing() {
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {CAPABILITIES.map((cap) => (
-              <div key={cap.title} className="card hover:shadow-lg transition-shadow duration-300">
-                <div className={`w-14 h-14 bg-gradient-to-br ${cap.color} rounded-2xl flex items-center justify-center mb-4 text-2xl`}>
+              <div key={cap.title} className="card hover:shadow-md transition-shadow duration-200">
+                <div className={`w-14 h-14 bg-gradient-to-br ${cap.color} rounded-xl flex items-center justify-center mb-4 text-2xl`}>
                   {cap.icon}
                 </div>
                 <h3 className="font-semibold text-gray-900 text-lg mb-2">{cap.title}</h3>
@@ -182,7 +159,7 @@ export default function Landing() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
             {PIPELINE_STEPS.map((step, i) => (
               <div key={step.label} className="text-center relative">
-                <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center mx-auto mb-4 text-2xl">
+                <div className="w-16 h-16 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center mx-auto mb-4 text-2xl">
                   {step.icon}
                 </div>
                 <div className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 text-sm font-bold mb-2">
@@ -209,19 +186,22 @@ export default function Landing() {
             Join Health Harmony and let Gemini 3 AI help you build lasting healthy habits. Free to use, always.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <Link
-              to="/signup"
-              className="inline-block bg-white text-emerald-700 font-semibold px-8 py-3.5 rounded-xl hover:bg-emerald-50 transition-colors text-base shadow-lg"
+            <a
+              href="/signup"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-white text-emerald-700 font-semibold px-8 py-3.5 rounded-lg hover:bg-emerald-50 transition-colors text-base shadow-lg active:scale-[0.97]"
             >
               Create Your Free Account
-            </Link>
-            <button
-              onClick={handleTryDemo}
-              disabled={demoLoading}
-              className="inline-block bg-white/20 text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-white/30 transition-colors text-base border border-white/30 disabled:opacity-50"
+            </a>
+            <a
+              href="/demo"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-white/20 text-white font-semibold px-8 py-3.5 rounded-lg hover:bg-white/30 transition-colors text-base border border-white/30 active:scale-[0.97]"
             >
-              {demoLoading ? 'Starting...' : 'Try Demo Instantly'}
-            </button>
+              Try Demo Instantly
+            </a>
           </div>
         </div>
       </section>
@@ -231,13 +211,13 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2">
-              <img src="/HHlogo.png" alt="Health Harmony" className="w-7 h-7 rounded-lg" />
+              <img src="/HHlogo.png" alt="Health Harmony" className="w-7 h-7 rounded" />
               <span className="font-semibold text-white">Health Harmony</span>
               <span className="text-xs text-gray-500 ml-2">Built on Gemini 3</span>
             </div>
             <div className="flex items-center gap-6 text-sm text-gray-400">
-              <Link to="/login" className="hover:text-white transition-colors">Sign In</Link>
-              <Link to="/signup" className="hover:text-white transition-colors">Sign Up</Link>
+              <a href="/login" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Sign In</a>
+              <a href="/signup" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Sign Up</a>
             </div>
           </div>
           <div className="mt-8 pt-6 border-t border-gray-800 text-center text-xs text-gray-500">

@@ -26,7 +26,7 @@ export default function FileUpload({ accept, onFile, label, icon }) {
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
-        className={`relative cursor-pointer border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-200 ${
+        className={`relative cursor-pointer border-2 border-dashed rounded-xl p-8 text-center transition-colors duration-200 ${
           dragOver
             ? 'border-emerald-400 bg-emerald-50'
             : 'border-gray-200 hover:border-emerald-300 hover:bg-gray-50'
@@ -53,7 +53,7 @@ export default function FileUpload({ accept, onFile, label, icon }) {
       </div>
 
       {preview && (
-        <div className="relative rounded-xl overflow-hidden border border-gray-200">
+        <div className="relative rounded-lg overflow-hidden border border-gray-200">
           {preview.includes('video') || accept?.includes('video') ? (
             <video src={preview} controls className="w-full max-h-64 object-contain bg-black" />
           ) : (
@@ -61,7 +61,8 @@ export default function FileUpload({ accept, onFile, label, icon }) {
           )}
           <button
             onClick={(e) => { e.stopPropagation(); setPreview(null); onFile(null) }}
-            className="absolute top-2 right-2 bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/70"
+            aria-label="Remove file"
+            className="absolute top-2 right-2 bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
             ×
           </button>

@@ -23,7 +23,7 @@ export default function NutritionCard({ data }) {
           <p className="text-sm text-gray-500 mt-1">{data.ingredients?.join(', ')}</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-3xl font-bold gradient-text">{data.nutrition?.calories}</span>
+          <span className="text-3xl font-bold gradient-text tabular-nums">{data.nutrition?.calories}</span>
           <span className="text-sm text-gray-400">kcal</span>
         </div>
       </div>
@@ -33,11 +33,11 @@ export default function NutritionCard({ data }) {
         <span className="text-sm text-gray-500">Health Score</span>
         <div className="flex-1 bg-gray-100 rounded-full h-2.5">
           <div
-            className="h-2.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
+            className="h-2.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-[width] duration-500 ease-out"
             style={{ width: `${(data.health_score || 0) * 10}%` }}
           />
         </div>
-        <span className="font-bold text-emerald-600">{data.health_score}/10</span>
+        <span className="font-bold text-emerald-600 tabular-nums">{data.health_score}/10</span>
       </div>
 
       {/* Macros */}
@@ -55,7 +55,7 @@ export default function NutritionCard({ data }) {
                   strokeLinecap="round"
                 />
               </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold">
+              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold tabular-nums">
                 {m.value || 0}
               </span>
             </div>
@@ -66,7 +66,7 @@ export default function NutritionCard({ data }) {
 
       {/* Notes */}
       {data.health_notes && (
-        <div className="bg-emerald-50 rounded-xl p-4">
+        <div className="bg-emerald-50 rounded-lg p-4">
           <p className="text-sm text-emerald-800">{data.health_notes}</p>
         </div>
       )}
@@ -88,7 +88,7 @@ export default function NutritionCard({ data }) {
 
       {/* Recipe suggestion */}
       {data.recipe_suggestion && (
-        <div className="bg-teal-50 rounded-xl p-4">
+        <div className="bg-teal-50 rounded-lg p-4">
           <h4 className="text-sm font-medium text-teal-700 mb-1">Recipe Idea</h4>
           <p className="text-sm text-teal-600">{data.recipe_suggestion}</p>
         </div>

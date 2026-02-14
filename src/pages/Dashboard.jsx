@@ -89,9 +89,9 @@ export default function Dashboard() {
       </div>
 
       {/* Daily AI Tip */}
-      <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-5 text-white shadow-lg">
+      <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl p-5 text-white shadow-lg">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
             </svg>
@@ -128,7 +128,7 @@ export default function Dashboard() {
             <Link
               key={item.label}
               to={item.path}
-              className={`flex-1 rounded-xl p-3 text-center transition-all ${
+              className={`flex-1 rounded-lg p-3 text-center transition-colors ${
                 item.done ? 'bg-emerald-50 border-2 border-emerald-200' : 'bg-gray-50 border-2 border-dashed border-gray-200 hover:border-emerald-300'
               }`}
             >
@@ -153,9 +153,9 @@ export default function Dashboard() {
           <Link
             key={action.path}
             to={action.path}
-            className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all group"
+            className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200 group"
           >
-            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center text-2xl mb-3 group-hover:scale-105 transition-transform`}>
+            <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center text-2xl mb-3 group-hover:scale-105 transition-transform duration-200`}>
               {action.icon}
             </div>
             <span className="font-medium text-sm text-gray-700">{action.label}</span>
@@ -168,31 +168,31 @@ export default function Dashboard() {
         <h2 className="font-semibold text-gray-700 mb-4">Recent Activity</h2>
         <div className="space-y-3">
           {latestMeal && (
-            <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-xl">
+            <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
               <span className="text-xl">🍽️</span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{latestMeal.meal_name}</p>
-                <p className="text-xs text-gray-400">{latestMeal.nutrition?.calories} kcal</p>
+                <p className="text-xs text-gray-400"><span className="tabular-nums">{latestMeal.nutrition?.calories}</span> kcal</p>
               </div>
               <span className="text-xs text-gray-400">{timeAgo(latestMeal.timestamp)}</span>
             </div>
           )}
           {latestWorkout && (
-            <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
+            <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
               <span className="text-xl">💪</span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{latestWorkout.exercise_detected}</p>
-                <p className="text-xs text-gray-400">Form: {latestWorkout.form_score}/10</p>
+                <p className="text-xs text-gray-400">Form: <span className="tabular-nums">{latestWorkout.form_score}/10</span></p>
               </div>
               <span className="text-xs text-gray-400">{timeAgo(latestWorkout.timestamp)}</span>
             </div>
           )}
           {latestMood && (
-            <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-xl">
+            <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
               <span className="text-xl">{MOOD_CATEGORIES[latestMood.mood_category]?.emoji || '😐'}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium">{MOOD_CATEGORIES[latestMood.mood_category]?.label || 'Okay'}</p>
-                <p className="text-xs text-gray-400">Score: {latestMood.mood_score}/10</p>
+                <p className="text-xs text-gray-400">Score: <span className="tabular-nums">{latestMood.mood_score}/10</span></p>
               </div>
               <span className="text-xs text-gray-400">{timeAgo(latestMood.timestamp)}</span>
             </div>

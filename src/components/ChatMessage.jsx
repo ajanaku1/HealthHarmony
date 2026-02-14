@@ -11,10 +11,10 @@ export default function ChatMessage({ message, isStreaming }) {
         </div>
       )}
       <div
-        className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+        className={`max-w-[80%] rounded-xl px-4 py-3 ${
           isUser
-            ? 'bg-emerald-500 text-white rounded-br-md'
-            : 'bg-white border border-gray-100 shadow-sm rounded-bl-md'
+            ? 'bg-emerald-500 text-white rounded-br-sm'
+            : 'bg-white border border-gray-100 shadow-sm rounded-bl-sm'
         } ${isStreaming ? 'streaming-cursor' : ''}`}
       >
         <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>

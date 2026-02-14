@@ -53,8 +53,8 @@ export default function Layout({ children }) {
           <span className="font-semibold text-sm gradient-text">Health Harmony</span>
         </div>
         <div className="flex items-center gap-3">
-          <Link to="/profile" className="text-xs text-gray-500 truncate max-w-[120px] hover:text-emerald-600 transition-colors">{displayName}</Link>
-          <button onClick={logout} className="text-gray-400 hover:text-gray-600 transition-colors">
+          <Link to="/profile" className="text-xs text-gray-500 truncate max-w-[120px] hover:text-emerald-600 transition-colors min-h-[44px] flex items-center">{displayName}</Link>
+          <button onClick={logout} aria-label="Sign out" className="text-gray-400 hover:text-gray-600 transition-colors p-2 -mr-2 min-h-[44px] min-w-[44px] flex items-center justify-center">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
             </svg>
@@ -77,7 +77,7 @@ export default function Layout({ children }) {
               key={item.path}
               to={item.path}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+                `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors duration-200 ${
                   isActive
                     ? 'bg-emerald-50 text-emerald-700 font-medium'
                     : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
@@ -106,8 +106,8 @@ export default function Layout({ children }) {
             </Link>
             <button
               onClick={logout}
-              title="Sign out"
-              className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+              aria-label="Sign out"
+              className="text-gray-400 hover:text-gray-600 transition-colors p-2 min-h-[44px] min-w-[44px] flex items-center justify-center"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
@@ -125,20 +125,20 @@ export default function Layout({ children }) {
       </main>
 
       {/* Mobile bottom navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-2 py-1 z-50">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-1 pb-[env(safe-area-inset-bottom)] z-50">
         <div className="flex justify-around">
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               className={({ isActive }) =>
-                `flex flex-col items-center py-2 px-1 min-w-0 transition-colors ${
+                `flex flex-col items-center justify-center py-2 px-2 min-w-[48px] min-h-[48px] transition-colors ${
                   isActive ? 'text-emerald-600' : 'text-gray-400'
                 }`
               }
             >
               <div className="w-6 h-6">{icons[item.icon]}</div>
-              <span className="text-[10px] mt-0.5 truncate">{item.label}</span>
+              <span className="text-[11px] mt-0.5 truncate">{item.label}</span>
             </NavLink>
           ))}
         </div>

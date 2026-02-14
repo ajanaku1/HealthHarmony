@@ -36,7 +36,7 @@ export default function LiveCoachingSession({ onSessionEnd }) {
   if (phase === 'setup') {
     return (
       <div className="card text-center py-10 space-y-6">
-        <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-2xl flex items-center justify-center mx-auto">
+        <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-xl flex items-center justify-center mx-auto">
           <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
             <path strokeLinecap="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
           </svg>
@@ -69,7 +69,7 @@ export default function LiveCoachingSession({ onSessionEnd }) {
         </div>
 
         {webcamError && (
-          <div className="bg-red-50 text-red-600 rounded-xl p-3 text-sm">
+          <div className="bg-red-50 text-red-600 rounded-lg p-3 text-sm">
             {webcamError}
           </div>
         )}
@@ -91,7 +91,7 @@ export default function LiveCoachingSession({ onSessionEnd }) {
     return (
       <div className="space-y-4">
         {/* Video container */}
-        <div className="relative bg-black rounded-2xl overflow-hidden aspect-[4/3]">
+        <div className="relative bg-black rounded-xl overflow-hidden aspect-[4/3]">
           <video
             ref={videoRef}
             autoPlay
@@ -123,8 +123,8 @@ export default function LiveCoachingSession({ onSessionEnd }) {
         <div className="flex items-center justify-center gap-3">
           <button
             onClick={toggleCamera}
-            className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors"
-            title="Switch camera"
+            aria-label="Switch camera"
+            className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
@@ -133,7 +133,8 @@ export default function LiveCoachingSession({ onSessionEnd }) {
 
           <button
             onClick={handlePauseResume}
-            className="w-14 h-14 bg-amber-500 hover:bg-amber-600 text-white rounded-xl flex items-center justify-center transition-colors"
+            aria-label={paused ? 'Resume coaching' : 'Pause coaching'}
+            className="w-14 h-14 bg-amber-500 hover:bg-amber-600 text-white rounded-lg flex items-center justify-center transition-colors active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
           >
             {paused ? (
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -148,7 +149,8 @@ export default function LiveCoachingSession({ onSessionEnd }) {
 
           <button
             onClick={handleStop}
-            className="w-14 h-14 bg-red-500 hover:bg-red-600 text-white rounded-xl flex items-center justify-center transition-colors"
+            aria-label="Stop coaching session"
+            className="w-14 h-14 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center justify-center transition-colors active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
           >
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
               <path d="M6 6h12v12H6z" />
@@ -157,7 +159,7 @@ export default function LiveCoachingSession({ onSessionEnd }) {
         </div>
 
         {webcamError && (
-          <div className="bg-red-50 text-red-600 rounded-xl p-3 text-sm">
+          <div className="bg-red-50 text-red-600 rounded-lg p-3 text-sm">
             {webcamError}
           </div>
         )}

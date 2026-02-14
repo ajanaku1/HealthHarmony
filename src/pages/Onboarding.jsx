@@ -77,7 +77,7 @@ export default function Onboarding() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 px-4 py-8">
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
-          <img src="/HHlogo.png" alt="Health Harmony" className="w-14 h-14 rounded-2xl mx-auto mb-3 shadow-md" />
+          <img src="/HHlogo.png" alt="Health Harmony" className="w-14 h-14 rounded-xl mx-auto mb-3 shadow-md" />
           <h1 className="text-2xl font-bold gradient-text">Welcome, {firstName}!</h1>
           <p className="text-gray-500 text-sm mt-1">Let&apos;s personalize your wellness journey</p>
         </div>
@@ -100,7 +100,7 @@ export default function Onboarding() {
                   <button
                     key={goal.id}
                     onClick={() => toggleGoal(goal.id)}
-                    className={`p-3 rounded-xl border-2 text-left text-sm font-medium transition-all ${
+                    className={`p-3 rounded-lg border-2 text-left text-sm font-medium transition-colors ${
                       fitnessGoals.includes(goal.id)
                         ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
                         : 'border-gray-200 hover:border-emerald-300 text-gray-600'
@@ -133,7 +133,7 @@ export default function Onboarding() {
                       <button
                         key={range}
                         onClick={() => setAgeRange(range)}
-                        className={`px-4 py-2 rounded-xl border-2 text-sm font-medium transition-all ${
+                        className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-colors ${
                           ageRange === range
                             ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
                             : 'border-gray-200 hover:border-emerald-300 text-gray-600'
@@ -151,7 +151,7 @@ export default function Onboarding() {
                       <button
                         key={level}
                         onClick={() => setFitnessLevel(level)}
-                        className={`flex-1 py-2.5 rounded-xl border-2 text-sm font-medium transition-all ${
+                        className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-colors ${
                           fitnessLevel === level
                             ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
                             : 'border-gray-200 hover:border-emerald-300 text-gray-600'
@@ -186,7 +186,7 @@ export default function Onboarding() {
                   <button
                     key={diet.id}
                     onClick={() => toggleDiet(diet.id)}
-                    className={`p-3 rounded-xl border-2 text-sm font-medium transition-all ${
+                    className={`p-3 rounded-lg border-2 text-sm font-medium transition-colors ${
                       dietaryPreferences.includes(diet.id)
                         ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
                         : 'border-gray-200 hover:border-emerald-300 text-gray-600'

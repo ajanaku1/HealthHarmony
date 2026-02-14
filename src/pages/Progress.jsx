@@ -85,7 +85,7 @@ export default function Progress() {
         {stats.map((stat) => (
           <div key={stat.label} className="card text-center p-4">
             <span className="text-2xl">{stat.icon}</span>
-            <p className="text-xl font-bold mt-1">{stat.value}</p>
+            <p className="text-xl font-bold mt-1 tabular-nums">{stat.value}</p>
             <p className="text-xs text-gray-400 mt-0.5">{stat.label}</p>
           </div>
         ))}

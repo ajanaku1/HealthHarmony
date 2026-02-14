@@ -76,20 +76,20 @@ export default function StreakCalendar({ meals, workouts, moods }) {
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 23a7.5 7.5 0 0 0 7.5-7.5c0-2.34-.98-5.25-2.7-7.89C15.16 5.26 13.26 3.2 12.56 2.5a.75.75 0 0 0-1.12 0C10.74 3.2 8.84 5.26 7.2 7.61 5.48 10.25 4.5 13.16 4.5 15.5A7.5 7.5 0 0 0 12 23z"/>
           </svg>
-          <span className="text-sm font-bold">{streak}</span>
+          <span className="text-sm font-bold tabular-nums">{streak}</span>
           <span className="text-xs font-medium opacity-90">day{streak !== 1 ? 's' : ''}</span>
         </div>
       </div>
 
       {/* Month navigation */}
       <div className="flex items-center justify-between mb-3">
-        <button onClick={prevMonth} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+        <button onClick={prevMonth} aria-label="Previous month" className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
         </button>
         <span className="text-sm font-medium text-gray-700">{monthLabel}</span>
-        <button onClick={nextMonth} disabled={isCurrentMonth} className={`p-1.5 rounded-lg transition-colors ${isCurrentMonth ? 'text-gray-200' : 'hover:bg-gray-100 text-gray-500'}`}>
+        <button onClick={nextMonth} disabled={isCurrentMonth} aria-label="Next month" className={`p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${isCurrentMonth ? 'text-gray-200' : 'hover:bg-gray-100 text-gray-500'}`}>
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
           </svg>

@@ -70,7 +70,7 @@ export default function MealAnalyzer() {
       )}
 
       {error && (
-        <div className="bg-red-50 text-red-600 rounded-xl p-4 text-sm">
+        <div className="bg-red-50 text-red-600 rounded-lg p-4 text-sm">
           {error}
         </div>
       )}
@@ -93,14 +93,14 @@ export default function MealAnalyzer() {
           <h2 className="font-semibold text-gray-700 mb-3">Recent Meals</h2>
           <div className="space-y-2">
             {meals.slice(0, 5).map((meal) => (
-              <div key={meal.id} className="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-100">
+              <div key={meal.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
                 <div>
                   <p className="text-sm font-medium">{meal.meal_name}</p>
                   <p className="text-xs text-gray-400">{new Date(meal.timestamp).toLocaleDateString()}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-bold text-emerald-600">{meal.nutrition?.calories} kcal</p>
-                  <p className="text-xs text-gray-400">Score: {meal.health_score}/10</p>
+                  <p className="text-sm font-bold text-emerald-600 tabular-nums">{meal.nutrition?.calories} kcal</p>
+                  <p className="text-xs text-gray-400 tabular-nums">Score: {meal.health_score}/10</p>
                 </div>
               </div>
             ))}

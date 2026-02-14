@@ -68,7 +68,7 @@ export default function AudioRecorder({ onRecording }) {
               <span className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
               <span className="text-red-600 font-medium">{formatTime(duration)}</span>
             </div>
-            <button onClick={stopRecording} className="btn-primary bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700">
+            <button onClick={stopRecording} className="btn-primary bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 active:scale-[0.97]">
               Stop Recording
             </button>
           </div>

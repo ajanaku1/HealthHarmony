@@ -5,22 +5,56 @@
 @layer base {
   body {
     @apply bg-gray-50 min-h-screen;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Prevent iOS Safari zoom on input focus */
+  input,
+  textarea,
+  select {
+    @apply text-base;
+  }
+
+  /* Remove iOS tap highlight */
+  button,
+  a,
+  [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Respect reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
 @layer components {
   .card {
-    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-6;
+    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6;
   }
   .btn-primary {
     @apply bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-medium
-           px-6 py-3 rounded-xl hover:from-emerald-600 hover:to-teal-600
-           transition-all duration-200 shadow-md hover:shadow-lg
-           disabled:opacity-50 disabled:cursor-not-allowed;
+           px-6 py-3 rounded-lg hover:from-emerald-600 hover:to-teal-600
+           transition-colors duration-200 shadow-md hover:shadow-lg
+           active:scale-[0.97] transition-transform
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
   }
   .btn-secondary {
-    @apply bg-white text-gray-700 font-medium px-6 py-3 rounded-xl
-           border border-gray-200 hover:bg-gray-50 transition-all duration-200;
+    @apply bg-white text-gray-700 font-medium px-6 py-3 rounded-lg
+           border border-gray-200 hover:bg-gray-50 transition-colors duration-200
+           active:scale-[0.97]
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2
+           disabled:active:scale-100;
   }
   .gradient-text {
     @apply bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent;
@@ -40,7 +74,7 @@
 
 /* Smooth page transitions */
 .page-enter {
-  animation: fadeIn 0.2s ease-out;
+  animation: fadeIn 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }

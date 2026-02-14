@@ -20,6 +20,9 @@ export default {
           900: '#064e3b',
         },
       },
+      transitionTimingFunction: {
+        'out-custom': 'cubic-bezier(0.22, 1, 0.36, 1)',
+      },
     },
   },
   plugins: [],

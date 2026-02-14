@@ -15,11 +15,11 @@ export default function WorkoutFeedback({ data }) {
             <GeminiBadge />
           </div>
           {data.reps_counted && (
-            <p className="text-sm text-gray-500 mt-1">{data.reps_counted} reps detected</p>
+            <p className="text-sm text-gray-500 mt-1"><span className="tabular-nums">{data.reps_counted}</span> reps detected</p>
           )}
         </div>
         <div className="text-center">
-          <span className={`text-3xl font-bold ${scoreColor}`}>{data.form_score}</span>
+          <span className={`text-3xl font-bold tabular-nums ${scoreColor}`}>{data.form_score}</span>
           <span className="text-sm text-gray-400">/10</span>
           <p className="text-xs text-gray-400 mt-0.5">Form Score</p>
         </div>
@@ -50,7 +50,7 @@ export default function WorkoutFeedback({ data }) {
 
       {/* Corrections */}
       {data.corrections?.length > 0 && (
-        <div className="bg-amber-50 rounded-xl p-4">
+        <div className="bg-amber-50 rounded-lg p-4">
           <h4 className="text-sm font-medium text-amber-700 mb-2">Corrections Needed</h4>
           <ul className="space-y-1">
             {data.corrections.map((c, i) => (
@@ -65,7 +65,7 @@ export default function WorkoutFeedback({ data }) {
 
       {/* Next workout suggestion */}
       {data.next_workout_suggestion && (
-        <div className="bg-emerald-50 rounded-xl p-4">
+        <div className="bg-emerald-50 rounded-lg p-4">
           <h4 className="text-sm font-medium text-emerald-700 mb-1">Next Session</h4>
           <p className="text-sm text-emerald-600">{data.next_workout_suggestion}</p>
         </div>
@@ -73,7 +73,7 @@ export default function WorkoutFeedback({ data }) {
 
       {/* Encouragement */}
       {data.encouragement && (
-        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl p-4">
+        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg p-4">
           <p className="text-sm text-white font-medium">{data.encouragement}</p>
         </div>
       )}

@@ -72,10 +72,10 @@ export default function MoodTracker() {
       </div>
 
       {/* Mode toggle */}
-      <div className="flex gap-2 bg-gray-100 rounded-xl p-1">
+      <div className="flex gap-2 bg-gray-100 rounded-lg p-1">
         <button
           onClick={() => setMode('voice')}
-          className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${
+          className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors ${
             mode === 'voice' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'
           }`}
         >
@@ -83,7 +83,7 @@ export default function MoodTracker() {
         </button>
         <button
           onClick={() => setMode('text')}
-          className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${
+          className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors ${
             mode === 'text' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'
           }`}
         >
@@ -99,7 +99,7 @@ export default function MoodTracker() {
           value={journalText}
           onChange={(e) => setJournalText(e.target.value)}
           placeholder="How are you feeling today? What's on your mind?"
-          className="w-full h-40 p-4 border border-gray-200 rounded-2xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          className="w-full h-40 p-4 border border-gray-200 rounded-xl text-sm resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:border-transparent"
         />
       )}
 
@@ -123,14 +123,14 @@ export default function MoodTracker() {
       )}
 
       {error && (
-        <div className="bg-red-50 text-red-600 rounded-xl p-4 text-sm">{error}</div>
+        <div className="bg-red-50 text-red-600 rounded-lg p-4 text-sm">{error}</div>
       )}
 
       {result && (
         <div className="space-y-4">
           <MoodCard data={result} />
           {result.pattern_note && (
-            <div className="bg-indigo-50 rounded-xl p-4">
+            <div className="bg-indigo-50 rounded-lg p-4">
               <h4 className="text-sm font-medium text-indigo-700 mb-1">Pattern Detected</h4>
               <p className="text-sm text-indigo-600">{result.pattern_note}</p>
             </div>
@@ -152,7 +152,7 @@ export default function MoodTracker() {
             {moods.slice(0, 7).map((mood) => {
               const info = MOOD_CATEGORIES[mood.mood_category] || MOOD_CATEGORIES.okay
               return (
-                <div key={mood.id} className="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-100">
+                <div key={mood.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
                   <div className="flex items-center gap-3">
                     <span className="text-xl">{info.emoji}</span>
                     <div>
@@ -160,7 +160,7 @@ export default function MoodTracker() {
                       <p className="text-xs text-gray-400">{new Date(mood.timestamp).toLocaleDateString()}</p>
                     </div>
                   </div>
-                  <span className="text-sm font-bold" style={{ color: info.color }}>{mood.mood_score}/10</span>
+                  <span className="text-sm font-bold tabular-nums" style={{ color: info.color }}>{mood.mood_score}/10</span>
                 </div>
               )
             })}
