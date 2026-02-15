@@ -92,6 +92,6 @@ Click "Try Demo" on the landing page to explore all features with sample data �
 - **Progress Dashboard** — Charts, streaks, and AI weekly summaries
 - **Guest Mode** — Full demo with seeded data, zero signup friction
 
-## Submission Description
+## Description
 
 Health Harmony is an AI wellness coach that showcases six Gemini 3 capabilities in a single production-ready app. Users photograph meals for instant nutrition analysis (multimodal vision + structured output), record workout videos or use live webcam coaching for real-time form feedback (video understanding), log moods via voice or text (audio NLU), and chat with a streaming AI coach that uses function calling to query their actual wellness data. Gemini Pro performs cross-feature reasoning to surface correlations between diet, exercise, and mood. Every AI response uses structured JSON schemas for reliability. A zero-friction demo mode makes the full experience explorable in seconds.
